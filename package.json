@@ -1,0 +1,20 @@
+{
+  "name": "hibira-cocos",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Hibira realtime and room lobby for Cocos Creator 3.x",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:test": "tsc -p tsconfig.test.json && node tools/copy-lobby.mjs",
+    "test": "npm run typecheck && npm run build:test && node --test test/*.test.mjs",
+    "test:e2e": "npm run build:test && node --test test/e2e.mjs",
+    "sync-lobby": "node tools/sync-lobby.mjs"
+  },
+  "devDependencies": {
+    "@hibira-io/lobby": "0.1.0",
+    "pusher-js": "^8.6.0",
+    "typescript": "^5.9.3"
+  }
+}

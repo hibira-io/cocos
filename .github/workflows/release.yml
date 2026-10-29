@@ -1,0 +1,28 @@
+# Attaches hibira-cocos-<tag>.zip (assets/hibira and the example) to each
+# published GitHub Release. The tag must be v<version from package.json>.
+name: release
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  asset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tag matches package.json version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          [ "v$version" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME != v$version"; exit 1; }
+      - run: npm ci
+      - run: npm test
+      - run: zip -r "hibira-cocos-$GITHUB_REF_NAME.zip" assets LICENSE README.md server
+      - run: gh release upload "$GITHUB_REF_NAME" "hibira-cocos-$GITHUB_REF_NAME.zip" --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "outDir": "test/.build" },
+  "include": ["assets/hibira/HibiraClient.ts"]
+}
