@@ -88,7 +88,17 @@ function loadPlayer(): { id: string; name: string } {
   } catch {
     // A new player below.
   }
-  const player = { id: 'p-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36), name: 'Player' };
+  const player = { id: 'p-' + randomId(), name: 'Player' };
   sys.localStorage.setItem(PLAYER_KEY, JSON.stringify(player));
   return player;
+}
+
+// Secure where the platform has crypto (web, recent native); the ID only
+// tells players apart, so Math.random is an acceptable fallback.
+function randomId(): string {
+  const c = (globalThis as { crypto?: { getRandomValues?(a: Uint8Array): Uint8Array } }).crypto;
+  const bytes = new Uint8Array(8);
+  if (c?.getRandomValues) c.getRandomValues(bytes);
+  else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
