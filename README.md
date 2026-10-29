@@ -36,9 +36,14 @@ a hosted realtime service that speaks the Pusher Channels protocol.
 3. Copy [`assets/hibira`](assets/hibira) into your project's `assets/`
    (or unzip `hibira-cocos-<version>.zip` from the
    [latest release](https://github.com/hibira-io/cocos/releases/latest)).
-4. Add the **HibiraConnection** component to a node in your first scene. Set
-   **App Key** (the key, never the secret) and **Auth Endpoint** (your
+4. Add the **HibiraConnection** component to a root node of your first
+   scene (not one under Canvas: only root nodes can persist across scenes).
+   Set **App Key** (the key, never the secret) and **Auth Endpoint** (your
    Worker's URL).
+5. In the app's Settings in the portal, add every origin your game runs on
+   to **Allowed origins**: `http://localhost:7456` for the editor's browser
+   preview, and the site of each web build. Browsers from other origins are
+   refused; the Free plan does not accept `*`.
 
 For WeChat and other mini-game builds, add `ws.hibira.io` (socket) and your
 auth endpoint's host (request) to the platform's allowed domains.
@@ -52,15 +57,21 @@ const hibira = HibiraConnection.instance!;
 hibira.setName('Ann');
 
 const room = hibira.joinRoom('ABCD', { capacity: 4 });
-room.on('members', ({ players, host }) => {
+// 'ready' brings the first member list, 'members' every change after it.
+const render = ({ players, host }) => {
   // players: [{ id, info: { name }, ready, host, me }] in seat order
-});
+};
+room.on('ready', render);
+room.on('members', render);
 room.on('message', (m) => console.log(`${m.info?.name}: ${m.text}`));
 room.on('start', ({ data }) => startGame(data.seed));
 
-room.setReady(true);
-room.send('gg');
-if (room.isHost) room.start({ seed: 42 }, { requireAllReady: true });
+// From buttons, once 'ready' has fired (before that, these throw):
+onReadyButton = () => room.setReady(!room.ready);
+onChatButton = (text) => room.send(text);
+onStartButton = () => {
+  if (room.isHost && room.allReady) room.start({ seed: 42 });
+};
 
 // Game events go on the same channel. Names start with client-, at most
 // 10 per second per player; the receiver gets the sender's user_id.
@@ -135,13 +146,15 @@ HIBIRA_E2E_KEY=... HIBIRA_E2E_SECRET=... HIBIRA_E2E_HOST=ws.hibira.io npm run te
 步骤：
 
 1. 在 [hibira.io](https://hibira.io/portal) 免费建立应用（不需信用卡），并在
-   设置中开启 **Allow client events**。
+   「设置」中开启 **允许客户端事件**。Secret 只在建立时显示一次，请立即复制。
 2. 部署 `server/` 中的 Cloudflare Worker（`npx wrangler deploy`，再用
    `npx wrangler secret put HIBIRA_APP_SECRET` 设定密钥）。密钥绝不能放进游戏里。
 3. 将 `assets/hibira` 复制到项目的 `assets/`。
-4. 在第一个场景的节点上加入 **HibiraConnection** 组件，填写 App Key（不是
+4. 在第一个场景的根节点（不要放在 Canvas 底下，只有根节点能跨场景保留）上加入 **HibiraConnection** 组件，填写 App Key（不是
    Secret）与 Worker 的网址，然后用 `HibiraConnection.instance.joinRoom('ABCD')`
    加入房间。
+5. 在「设置」的 **允许的来源** 加入游戏运行的来源：编辑器浏览器预览为
+   `http://localhost:7456`，以及每个网页版的网址。免费方案不能填 `*`。
 
 微信等小游戏平台需将 `ws.hibira.io`（socket）与验证端点的域名（request）加入
 合法域名。
