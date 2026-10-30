@@ -1,0 +1,11 @@
+# npx wrangler deploy   (then: npx wrangler secret put HIBIRA_APP_SECRET)
+name = "hibira-cocos-auth"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+HIBIRA_APP_KEY = ""
+ROOM_PREFIX = "presence-room-"
+ALLOWED_ORIGINS = "*"
+# ROOM_CAPACITY = "8"
+# HIBIRA_APP_ID = ""
