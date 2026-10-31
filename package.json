@@ -1,7 +1,7 @@
 {
   "name": "hibira-cocos",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Hibira realtime and room lobby for Cocos Creator 3.x",
   "type": "module",
   "license": "MIT",
