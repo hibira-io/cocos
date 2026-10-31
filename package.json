@@ -1,7 +1,7 @@
 {
   "name": "hibira-cocos",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Hibira realtime and room lobby for Cocos Creator 3.x",
   "type": "module",
   "license": "MIT",
@@ -13,7 +13,7 @@
     "sync-lobby": "node tools/sync-lobby.mjs"
   },
   "devDependencies": {
-    "@hibira-io/lobby": "0.1.0",
+    "@hibira-io/lobby": "0.2.0",
     "pusher-js": "^8.6.0",
     "typescript": "^5.9.3"
   }

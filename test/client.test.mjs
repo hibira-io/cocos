@@ -1,4 +1,4 @@
-// HibiraClient against a fake WebSocket, and the lobby Room on top of it.
+// HibiraClient against a fake WebSocket, and the lobby Room and Queue on top of it.
 import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -51,7 +51,7 @@ afterEach(() => {
 });
 
 const { HibiraClient } = await import('./.build/HibiraClient.js');
-const { Room } = await import('./.build/lobby.js');
+const { Room, Queue } = await import('./.build/lobby.js');
 
 function client(options = {}) {
   const c = new HibiraClient('app-key', { authEndpoint: 'https://auth.example/auth', ...options });
@@ -207,4 +207,28 @@ test('lobby Room runs on HibiraClient', async () => {
   assert.equal(room.isHost, true);
   room.leave();
   assert.deepEqual(ws.last('pusher:unsubscribe').data, { channel: 'presence-room-ABCD' });
+});
+
+test('matchmaking Queue runs on HibiraClient and moves into the match room', async () => {
+  const c = client({ authParams: () => ({ user_id: 'me' }) });
+  const ws = FakeSocket.all[0];
+  ws.open();
+  const queue = Queue.join(c, 'presence-queue-duo', { size: 2, timeout: Infinity });
+  await tick();
+  ws.receive(
+    'pusher_internal:subscription_succeeded',
+    { presence: { ids: ['host', 'me'], hash: { host: { joined_at: 1, rating: 1000 }, me: { joined_at: 2, rating: 1010 } } } },
+    { channel: 'presence-queue-duo' },
+  );
+  assert.equal(queue.isHost, false);
+  assert.equal(queue.position, 2);
+  let match;
+  queue.on('match', (m) => (match = m));
+  ws.receive('client-queue-match', { matches: [{ id: 'abc', players: ['host', 'me'] }] }, { channel: 'presence-queue-duo', user_id: 'host' });
+  assert.equal(match.channel, 'presence-match-abc');
+  assert.equal(match.room.capacity, 2);
+  assert.deepEqual(ws.last('pusher:unsubscribe').data, { channel: 'presence-queue-duo' });
+  await tick();
+  assert.equal(ws.last('pusher:subscribe').data.channel, 'presence-match-abc');
+  match.room.leave();
 });

@@ -15,6 +15,10 @@ a hosted realtime service that speaks the Pusher Channels protocol.
   room chat on a presence channel, with no game server. It is
   [@hibira-io/lobby](https://github.com/hibira-io/lobby-js), so Cocos players
   can share rooms with web players who use pusher-js.
+- **Matchmaking queue**: `Queue` from the same file matches waiting players
+  by rating and criteria, gives up after a timeout, and moves each match into
+  a new room. Cocos, Unity and web players can wait in the same queue. See the
+  [lobby-js README](https://github.com/hibira-io/lobby-js#matchmaking-queue).
 - **`HibiraConnection`**: a component that holds the connection across
   scenes, with the app key and auth endpoint set in the Inspector.
 - An auth endpoint as a Cloudflare Worker (free plan) in [`server/`](server).
@@ -125,8 +129,8 @@ npm test         # typecheck, unit tests
 HIBIRA_E2E_KEY=... HIBIRA_E2E_SECRET=... HIBIRA_E2E_HOST=ws.hibira.io npm run test:e2e
 ```
 
-`assets/hibira/lobby.js` is a copy of @hibira-io/lobby; update it with
-`npm run sync-lobby`.
+`assets/hibira/lobby.js`, `lobby-queue.js` and `lobby-match.js` are copies of
+@hibira-io/lobby; update them with `npm run sync-lobby`.
 
 ## 中文
 
@@ -140,6 +144,8 @@ HIBIRA_E2E_KEY=... HIBIRA_E2E_SECRET=... HIBIRA_E2E_HOST=ws.hibira.io npm run te
 - **房间大厅**：座位、房主、准备状态、房间设置、踢人、开始游戏和房间聊天，
   不需要游戏服务器。与 [@hibira-io/lobby](https://github.com/hibira-io/lobby-js)
   相同，Cocos 玩家可与使用 pusher-js 的网页玩家同房间。
+- **匹配队列**：同一文件中的 `Queue` 按评分与条件匹配排队玩家，超时会放弃，
+  匹配成功后自动进入新房间。Cocos、Unity 与网页玩家可排同一个队列。
 - **HibiraConnection** 组件：在 Inspector 填写 App Key 与 Auth Endpoint，
   切换场景时保持连接。
 

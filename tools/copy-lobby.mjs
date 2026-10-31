@@ -1,4 +1,6 @@
-// Puts lobby.js next to the compiled HibiraClient.js for the Node tests.
+// Puts the lobby files next to the compiled HibiraClient.js for the Node tests.
 import { copyFileSync } from 'node:fs';
 
-copyFileSync('assets/hibira/lobby.js', 'test/.build/lobby.js');
+for (const file of ['lobby.js', 'lobby-queue.js', 'lobby-match.js']) {
+  copyFileSync(`assets/hibira/${file}`, `test/.build/${file}`);
+}

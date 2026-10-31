@@ -1,4 +1,4 @@
-// Copied from @hibira-io/lobby 0.1.0 (https://github.com/hibira-io/lobby-js, MIT).
+// Copied from @hibira-io/lobby 0.2.0 (https://github.com/hibira-io/lobby-js, MIT).
 // It runs on HibiraClient as well as on pusher-js. Do not edit here; update it
 // with: npm run sync-lobby
 
@@ -463,4 +463,6 @@ function randomID() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 }
 
+export { Queue, QUEUE_EVENT } from './lobby-queue.js';
+export { findMatches, allowedRange, criteriaFit } from './lobby-match.js';
 export default Room;

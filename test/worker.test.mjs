@@ -38,3 +38,12 @@ test('CORS', async () => {
   const no = await post({ socket_id: '1.2', channel_name: 'presence-room-A', user_id: 'p' }, only, { Origin: 'https://evil.example' });
   assert.equal(no.headers.get('Access-Control-Allow-Origin'), null);
 });
+
+test('signs matchmaking queues and match rooms too', async () => {
+  for (const channel_name of ['presence-queue-duo', 'presence-match-0123abcd']) {
+    const res = await post({ socket_id: '1.2', channel_name, user_id: 'p-1' });
+    assert.equal(res.status, 200, channel_name);
+  }
+  const custom = { ...env, QUEUE_PREFIX: 'presence-q-' };
+  assert.equal((await post({ socket_id: '1.2', channel_name: 'presence-q-duo', user_id: 'p' }, custom)).status, 200);
+});
