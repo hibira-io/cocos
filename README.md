@@ -1,5 +1,7 @@
 # Hibira for Cocos Creator
 
+![Hibira for Cocos Creator](.github/cover.jpg)
+
 [![ci](https://github.com/hibira-io/cocos/actions/workflows/ci.yml/badge.svg)](https://github.com/hibira-io/cocos/actions/workflows/ci.yml)
 
 [中文](#中文) · English
