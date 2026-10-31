@@ -27,7 +27,7 @@ export type ConnectionState = 'initialized' | 'connecting' | 'connected' | 'unav
 
 type Handler = (data: any, meta?: { user_id?: string }) => void;
 
-const VERSION = '0.2.0';
+const VERSION = '0.2.1';
 
 class Emitter {
   private handlers = new Map<string, Handler[]>();
