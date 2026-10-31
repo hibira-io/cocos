@@ -6,6 +6,8 @@
 //   HIBIRA_APP_KEY      your app key
 //   HIBIRA_APP_SECRET   your app secret (a secret, not a var)
 //   ROOM_PREFIX         default presence-room-, what HibiraConnection.joinRoom uses
+//   QUEUE_PREFIX        default presence-queue-, matchmaking queues (lobby.js Queue)
+//   MATCH_PREFIX        default presence-match-, the rooms a queue match moves into
 //   ALLOWED_ORIGINS     comma-separated origins for web builds, or * (default)
 //   ROOM_CAPACITY       optional: refuse players past this many per room;
 //                       needs HIBIRA_APP_ID (and HIBIRA_HOST if not ws.hibira.io)
@@ -57,21 +59,25 @@ export default {
     const channel = form.get('channel_name') || '';
     const userId = form.get('user_id') || '';
     const name = (form.get('name') || '').trim().slice(0, 20) || 'Player';
-    const prefix = env.ROOM_PREFIX || 'presence-room-';
+    const prefixes = [env.ROOM_PREFIX || 'presence-room-', env.QUEUE_PREFIX || 'presence-queue-', env.MATCH_PREFIX || 'presence-match-'];
+    const isQueue = channel.startsWith(prefixes[1]);
 
-    if (!/^\d+\.\d+$/.test(socketId) || !channel.startsWith(prefix) || !/^[A-Za-z0-9_\-=@,.;]{1,164}$/.test(channel)) {
+    if (!/^\d+\.\d+$/.test(socketId) || !prefixes.some((p) => channel.startsWith(p)) || !/^[A-Za-z0-9_\-=@,.;]{1,164}$/.test(channel)) {
       return reply(403, { error: 'forbidden' }, headers);
     }
     if (!/^[A-Za-z0-9-]{1,64}$/.test(userId)) return reply(403, { error: 'bad user_id' }, headers);
 
     const capacity = Number(env.ROOM_CAPACITY || 0);
-    if (capacity > 0 && env.HIBIRA_APP_ID && (await roomSize(env, channel)) >= capacity) {
+    if (capacity > 0 && !isQueue && env.HIBIRA_APP_ID && (await roomSize(env, channel)) >= capacity) {
       return reply(403, { error: 'room full' }, headers);
     }
 
     // This trusts the ID and name the game sends. With your own login,
     // take them from the player's session instead.
     // joined_at orders the room the same way for every player (see lobby.js).
+    // In a queue it is also the waiting time. To match by skill, add the
+    // player's rating (and criteria such as mode or region) from your own
+    // records here: user_info.rating, user_info.criteria.
     const channelData = JSON.stringify({ user_id: userId, user_info: { name, joined_at: Date.now() } });
     const signature = await hmac(env.HIBIRA_APP_SECRET, `${socketId}:${channel}:${channelData}`);
     return reply(200, { auth: `${env.HIBIRA_APP_KEY}:${signature}`, channel_data: channelData }, headers);
